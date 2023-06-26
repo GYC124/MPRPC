@@ -1,0 +1,65 @@
+syntax = "proto3"; // 声明了protobuf的版本
+
+package fixbug; // 声明了代码所在的包（对于C++来说是namespace）
+
+// 定义下面的选项，表示生成service服务类和rpc方法描述，默认不生成
+option cc_generic_services = true;
+
+message ResultCode
+{
+    int32 errcode = 1;
+    bytes errmsg = 2;
+}
+
+// 数据   列表   映射表
+// 定义登录请求消息类型  name   pwd
+message LoginRequest
+{
+    bytes name = 1;
+    bytes pwd = 2;
+    // map<int32, string> test = 3; // proto中的map映射处理复杂定义
+}
+
+// 定义登录响应消息类型
+message LoginResponse
+{
+    ResultCode result = 1;
+    bool success = 2;
+}
+
+message GetFriendListsRequest
+{
+    uint32 userid = 1;
+}
+
+message User
+{
+    bytes name = 1; // bytes也可使用string，bytes减少了字节间的数据转换
+    uint32 age = 2;
+    enum Sex
+    {
+        MAN = 0;
+        WOMAN = 1;
+    }
+    Sex sex = 3;
+}
+
+message GetFriendListsResponse
+{
+    ResultCode result = 1;
+    // repeated: 该字段可以重复任意次数(包括零次)。重复值的顺序将被保留
+    repeated User friend_list = 2;  // 定义了一个列表类型
+}
+
+// 在protobuf里面怎么定义描述rpc方法的类型 - service
+service UserServiceRpc
+{
+    rpc Login(LoginRequest) returns(LoginResponse);
+    rpc GetFriendLists(GetFriendListsRequest) returns(GetFriendListsResponse);
+}
+
+/*
+这个服务定义使用了 Protocol Buffers（Protobuf）来定义消息格式。在实际使用中，需要在 Protobuf 文件中定义 LoginRequest、LoginResponse、GetFriendListsRequest 和 GetFriendListsResponse 这些消息的结构和字段。然后，
+通过使用基于 Protobuf 的 RPC 框架（如 gRPC），将这个服务定义与具体的实现绑定起来，使客户端和服务器能够通过网络进行通信和调用。
+通过定义 UserServiceRpc 这个服务以及其中的 RPC 方法，可以在分布式系统中实现用户登录和获取好友列表等功能，将客户端与服务器连接起来，实现远程过程调用的功能。
+*/
